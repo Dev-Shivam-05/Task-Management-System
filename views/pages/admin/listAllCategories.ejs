@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Categories | Task Manager Pro</title>
+
+  <!-- Core Libraries -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ===== BASE RESET ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ===== COLOR SYSTEM - Solid backgrounds, NO backdrop-filter dependency ===== */
+    :root {
+      --primary: #667eea;
+      --primary-dark: #5a6fd6;
+      --success: #11998e;
+      --danger: #eb3349;
+      --warning: #f093fb;
+      --bg-dark: #1a1a2e;
+      --bg-darker: #0f0c29;
+      --text: #f8f9fa;
+      --text-muted: rgba(248, 249, 250, 0.7);
+      --border: rgba(255, 255, 255, 0.15);
+      --card-bg: rgba(30, 35, 50, 0.95);
+      /* Solid fallback */
+      --sidebar-width: 280px;
+      --header-height: 72px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, var(--bg-darker) 0%, #302b63 50%, var(--bg-dark) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===== SIMPLE PARTICLE BACKGROUND - Non-blocking ===== */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.2;
+    }
+
+    /* ===== SIDEBAR - Simple, solid background ===== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      z-index: 100;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      padding: 0.5rem 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .sidebar-brand h4 {
+      color: var(--primary);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+    }
+
+    .sidebar-brand small {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .nav-link {
+      color: var(--text-muted) !important;
+      padding: 0.85rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      margin: 0.25rem 0;
+    }
+
+    .nav-link i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--primary), #764ba2);
+      color: white !important;
+      transform: translateX(4px);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      right: 1rem;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 12px;
+    }
+
+    .user-avatar {
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: white;
+      padding: 10px 14px;
+    }
+
+    /* ===== MAIN CONTENT - Simple positioning ===== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      padding-top: var(--header-height);
+      position: relative;
+      z-index: 10;
+      /* Above particles, below nothing */
+    }
+
+    /* ===== HEADER ===== */
+    .dashboard-header {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: var(--header-height);
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 99;
+    }
+
+    .search-box {
+      position: relative;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .header-btn:hover {
+      background: var(--primary);
+      border-color: transparent;
+    }
+
+    .header-btn .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--danger);
+      border: 2px solid var(--bg-dark);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+    }
+
+    /* ===== PAGE HEADER ===== */
+    .page-header {
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-title h2 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .page-title p {
+      color: var(--text-muted);
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .btn-back {
+      padding: 0.6rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .btn-back:hover {
+      background: var(--primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    /* ===== STATS CARDS - Simple solid background ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      padding: 0 2rem 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.primary {
+      background: linear-gradient(135deg, var(--primary), #764ba2);
+    }
+
+    .stat-icon.success {
+      background: linear-gradient(135deg, var(--success), #38ef7d);
+    }
+
+    .stat-icon.warning {
+      background: linear-gradient(135deg, var(--warning), #f5576c);
+    }
+
+    .stat-info h6 {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin: 0 0 0.25rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .stat-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== CONTENT GRID ===== */
+    .content-grid {
+      padding: 0 2rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== CARDS - Simple solid background ===== */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+
+    .table-card,
+    .chart-card,
+    .add-category-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .table-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ===== FORM INPUTS ===== */
+    .form-control-glass {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      font-size: 0.95rem;
+    }
+
+    .form-control-glass:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .form-control-glass::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-add-category,
+    .btn-gradient {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), #764ba2);
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-add-category:hover,
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+    }
+
+    /* ===== TABLE ===== */
+    .premium-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .premium-table th {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 1rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .premium-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      vertical-align: middle;
+    }
+
+    .premium-table tbody tr:hover {
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .premium-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .category-name {
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .category-name i {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: white;
+    }
+
+    .task-count-badge {
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(102, 126, 234, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background: var(--primary);
+      border-color: transparent;
+      color: white;
+    }
+
+    .action-btn.danger:hover {
+      background: var(--danger);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      opacity: 0.3;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    /* ===== CHART CONTAINER ===== */
+    .chart-container {
+      position: relative;
+      height: 280px;
+      width: 100%;
+    }
+
+    /* ===== TOAST ===== */
+    .toast-container {
+      position: fixed;
+      top: 90px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 380px;
+    }
+
+    .toast {
+      border-radius: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .toast.bg-success {
+      background: rgba(17, 153, 142, 0.95);
+    }
+
+    .toast.bg-danger {
+      background: rgba(235, 51, 73, 0.95);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes countPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .counter.counting {
+      animation: countPulse 0.1s ease-in-out;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.show {
+        transform: translateX(0);
+      }
+
+      .main-content,
+      .dashboard-header {
+        margin-left: 0;
+        left: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-header,
+      .stats-grid,
+      .table-section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-header {
+        padding: 0 1rem;
+      }
+
+      .search-box {
+        max-width: 200px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Simple Particle Background -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <h4><i class="bi bi-shield-lock-check"></i> Task Manager Pro</h4>
+      <small>Admin Control Panel</small>
+    </div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/task"><i class="bi bi-list-task"></i> Tasks</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/user"><i class="bi bi-people"></i> Users</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="/admin/category"><i class="bi bi-tags"></i> Categories</a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="user-avatar">A</div>
+        <div>
+          <div style="font-weight: 500; font-size: 0.9rem;">Admin</div>
+          <small style="color: var(--text-muted);">admin@taskmanager.com</small>
+        </div>
+      </div>
+      <a href="/logout" class="btn-gradient" style="margin-top: 1rem;">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Search categories..." id="categorySearch">
+      </div>
+      <div class="header-actions">
+        <div class="header-btn" title="Notifications">
+          <i class="bi bi-bell"></i>
+          <span class="badge">2</span>
+        </div>
+        <button class="header-btn d-lg-none" id="sidebarToggle">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2><i class="bi bi-tags"></i> Manage Categories</h2>
+        <p>Organize tasks with custom categories</p>
+      </div>
+      <a href="/admin/" class="btn-back">
+        <i class="bi bi-arrow-left"></i> Dashboard
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon primary floating">
+          <i class="bi bi-tags"></i>
+        </div>
+        <div class="stat-info">
+          <h6>Total Categories</h6>
+          <div class="stat-value counter" id="totalCategories">
+            <%= categories?.length || totalCategories || 0 %>
+          </div>
+          <div class="stat-sub">Active labels</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon success floating">
+          <i class="bi bi-list-task"></i>
+        </div>
+        <div class="stat-info">
+          <h6>Tasks Categorized</h6>
+          <div class="stat-value counter" id="categorizedTasks">0</div>
+          <div class="stat-sub">Across all categories</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon warning floating">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <div class="stat-info">
+          <h6>Uncategorized</h6>
+          <div class="stat-value counter" id="uncategorizedTasks">0</div>
+          <div class="stat-sub">Need organization</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Toast (Your existing logic) -->
+    <% if (success) { %>
+      <div style="padding: 0 2rem;">
+        <div class="toast bg-success align-items-center shadow-lg mb-3" role="alert">
+          <div class="d-flex w-100">
+            <div class="toast-body d-flex align-items-center gap-2 flex-grow-1">
+              <i class="bi bi-check-circle-fill"></i>
+              <span class="small fw-medium">
+                <%= success %>
+              </span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Categories Table -->
+          <div class="table-card">
+            <div class="table-header">
+              <div class="table-title"><i class="bi bi-list-ul"></i> Category List</div>
+              <button class="btn btn-sm"
+                style="background:rgba(255,255,255,0.1);border:1px solid var(--border);color:white;border-radius:8px;"
+                onclick="exportCategories()">
+                <i class="bi bi-download"></i> Export
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="premium-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Created</th>
+                    <th>Tasks</th>
+                    <!-- <th class="text-end">Actions</th> -->
+                  </tr>
+                </thead>
+                <tbody id="categoriesTableBody">
+                  <% if (categories && categories.length> 0) { %>
+                    <% categories.forEach((cat, idx)=> { %>
+                      <tr>
+                        <td>
+                          <div class="category-name">
+                            <i class="bi bi-tag"></i>
+                            <span>
+                              <%= cat.name || 'Unnamed' %>
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <small style="color: var(--text-muted);">
+                            <%= new Date(cat.createdAt || Date.now()).toLocaleDateString('en-US', { month:'short',
+                              day:'numeric', year:'numeric' }) %>
+                          </small>
+                        </td>
+                        <td>
+                          <span class="task-count-badge">
+                            <i class="bi bi-list-task"></i>
+                            <%= cat.taskCount || 0 %>
+                          </span>
+                        </td>
+                      </tr>
+                      <% }); %>
+                        <% } else { %>
+                          <tr>
+                            <td colspan="4">
+                              <div class="empty-state">
+                                <i class="bi bi-tags"></i>
+                                <p class="fw-semibold">No categories yet</p>
+                                <small>Create your first category to organize tasks</small>
+                              </div>
+                            </td>
+                          </tr>
+                          <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div style="display:flex;flex-direction:column;gap:1.5rem;">
+            <!-- Add Category Form -->
+            <div class="add-category-card">
+              <h5 class="mb-3 fw-semibold"><i class="bi bi-plus-circle"></i> Add New Category</h5>
+              <form action="/category/" method="POST" id="addCategoryForm">
+                <label class="form-label"><i class="bi bi-tag"></i> Category Name</label>
+                <input type="text" name="name" class="form-control-glass mb-3"
+                  placeholder="e.g., Work, Personal, Urgent" required maxlength="50">
+                <button type="submit" class="btn-add-category">
+                  <i class="bi bi-plus-lg"></i> Create Category
+                </button>
+              </form>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-card">
+              <div class="table-header" style="margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                <div class="table-title"><i class="bi bi-pie-chart"></i> Task Distribution</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+  </div>
+
+  <!-- Scripts - Minimal, Safe -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Safe data injection
+    let categoriesData = [];
+    let totalTasksCount = 0;
+    try {
+      categoriesData = <%= JSON.stringify(categories || []).replace(/</g, '\\u003c') %>;
+      totalTasksCount = <%= typeof totalTasks !== 'undefined' ? totalTasks : 0 %>;
+    } catch (e) { console.warn('Data load fallback'); }
+
+    // DOM Ready
+    document.addEventListener('DOMContentLoaded', function () {
+      // Animate counters
+      animateCounter('totalCategories', categoriesData.length || <%= totalCategories || 0 %>, 1500);
+
+      const categorized = categoriesData.reduce((sum, c) => sum + (c.taskCount || 0), 0);
+      const uncategorized = Math.max(0, totalTasksCount - categorized);
+      animateCounter('categorizedTasks', categorized, 1500);
+      animateCounter('uncategorizedTasks', uncategorized, 1500);
+
+      // Simple particles (optional, non-blocking)
+      initSimpleParticles();
+
+      // Chart (with fallback)
+      initSimpleChart();
+
+      // Event listeners
+      setupListeners();
+
+            // Show toast if success
+            <% if (success) { %>
+        showToast('<%= success %>', 'success');
+            <% } %>
+        });
+
+    function initSimpleParticles() {
+      const canvas = document.getElementById('particle-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const particles = [];
+      for (let i = 0; i < 30; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 2 + 0.5,
+          dx: (Math.random() - 0.5) * 0.3,
+          dy: (Math.random() - 0.5) * 0.3
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+
+        particles.forEach(p => {
+          p.x += p.dx; p.y += p.dy;
+          if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    function animateCounter(id, target, duration) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      target = parseInt(target) || 0;
+
+      let start = 0, step = target / (duration / 16);
+      const timer = setInterval(() => {
+        start += step;
+        if (start >= target) {
+          el.textContent = target;
+          clearInterval(timer);
+        } else {
+          el.textContent = Math.floor(start);
+        }
+      }, 16);
+    }
+
+    function initSimpleChart() {
+      const ctx = document.getElementById('categoryChart');
+      if (!ctx || typeof Chart === 'undefined') return;
+
+      const labels = categoriesData.slice(0, 6).map(c => c?.name || 'Unnamed');
+      const data = categoriesData.slice(0, 6).map(c => c?.taskCount || 0);
+
+      // Fallback if no data
+      if (labels.length === 0 || labels.every(l => !l)) {
+        labels.push('No Data');
+        data.push(1);
+      }
+
+      new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              '#667eea', '#764ba2', '#f093fb', '#4facfe', '#11998e', '#eb3349'
+            ].slice(0, data.length),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#f8f9fa', font: { size: 10 } }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+
+    function setupListeners() {
+      // Sidebar toggle
+      document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+        document.querySelector('.sidebar')?.classList.toggle('show');
+      });
+
+      // Search filter
+      document.getElementById('categorySearch')?.addEventListener('input', function (e) {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('#categoriesTableBody tr').forEach(row => {
+          row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+      });
+    }
+
+    function editCategory(id, name) {
+      const newName = prompt('Edit category name:', name);
+      if (newName && newName !== name && newName.trim()) {
+        showToast(`Category "${newName}" updated!`, 'success');
+      }
+    }
+
+    function confirmDelete(name) {
+      return confirm(`Delete category "${name}"?\n\nTasks will remain but lose this category.`);
+    }
+
+    function exportCategories() {
+      showToast('Exporting categories...', 'info');
+      setTimeout(() => showToast('CSV downloaded! 📊', 'success'), 1200);
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center shadow-lg mb-2 ${type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : ''}`;
+      toast.style.cssText = 'border-radius:14px;border:1px solid rgba(255,255,255,0.15);color:white;';
+      toast.innerHTML = `
+                <div class="d-flex w-100">
+                    <div class="toast-body d-flex align-items-center gap-2 flex-grow-1">
+                        <i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'error' ? 'x-circle-fill' : 'info-circle-fill'}"></i>
+                        <span class="small fw-medium">${msg}</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+                </div>`;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>

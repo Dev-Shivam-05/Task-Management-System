@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users | Task Manager Pro</title>
+
+    <!-- Core Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- PREMIUM CSS - Exact match to your admin dashboard -->
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg-dark: rgba(30, 35, 50, 0.92);
+            --glass-border-dark: rgba(255, 255, 255, 0.15);
+            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --sidebar-width: 280px;
+            --header-height: 72px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #f8f9fa;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Particle Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.25;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: rotate 25s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border-dark);
+            border-radius: 20px;
+            box-shadow: var(--shadow-glass);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            transition: left 0.6s ease;
+            pointer-events: none;
+        }
+        .text-primary {
+            color: var(--primary-gradient);
+        }
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        /* Sidebar - Exact copy from admin dashboard */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-right: 1px solid var(--glass-border-dark);
+            z-index: 1000;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 0.5rem 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--glass-border-dark);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-brand h4 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand small {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+        }
+
+        .nav-item {
+            margin: 0.25rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--primary-gradient);
+            color: white !important;
+            transform: translateX(4px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.3);
+            }
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border-dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .user-avatar {
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            padding: 10px 14px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding-top: var(--header-height);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Header */
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 999;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-btn {
+            border-radius: 12px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            padding: 10px 14px;
+        }
+
+        .header-btn:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        /* Page Header */
+        .page-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title h2 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-title p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            padding: 0 2rem 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon::after {
+            opacity: 1;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(45deg) translateX(-100%);
+            }
+
+            100% {
+                transform: rotate(45deg) translateX(100%);
+            }
+        }
+
+        .stat-icon.primary {
+            background: var(--primary-gradient);
+        }
+
+        .stat-icon.success {
+            background: var(--success-gradient);
+        }
+
+        .stat-icon.warning {
+            background: var(--warning-gradient);
+        }
+
+        .stat-info h6 {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-sub {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Table */
+        .table-section {
+            padding: 0 2rem 2rem;
+        }
+
+        .table-card {
+            padding: 1.5rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border-dark);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .premium-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .premium-table th {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid var(--glass-border-dark);
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .premium-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            vertical-align: middle;
+            transition: background 0.2s ease;
+        }
+
+        .premium-table tbody tr {
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .premium-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.12), transparent) !important;
+            transform: translateX(4px);
+        }
+
+        .premium-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-cell .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user-cell .user-info .name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .user-cell .user-info .email {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .role-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .role-badge.admin {
+            background: rgba(235, 51, 73, 0.15);
+            color: #eb3349;
+            border: 1px solid rgba(235, 51, 73, 0.3);
+        }
+
+        .role-badge.user {
+            background: rgba(56, 239, 125, 0.15);
+            color: #38ef7d;
+            border: 1px solid rgba(56, 239, 125, 0.3);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            background: var(--danger-gradient);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state p {
+            margin: 0.5rem 0;
+        }
+
+        /* Animated Counter */
+        .counter {
+            font-variant-numeric: tabular-nums;
+            transition: all 0.3s ease;
+        }
+
+        .counter.counting {
+            animation: countPulse 0.1s ease-in-out;
+        }
+
+        @keyframes countPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 380px;
+        }
+
+        .toast-animated {
+            animation: slideInRight 0.4s ease, fadeOut 0.4s ease 2.6s forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        .toast {
+            border-radius: 14px !important;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border-dark) !important;
+        }
+
+        .toast.bg-success {
+            background: rgba(17, 153, 142, 0.9) !important;
+        }
+
+        .toast.bg-danger {
+            background: rgba(235, 51, 73, 0.9) !important;
+        }
+
+        .toast.bg-white {
+            background: var(--glass-bg-dark) !important;
+            color: white;
+        }
+
+        /* Utilities */
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-gradient {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 0.6rem 1.4rem;
+        }
+
+        .btn-gradient::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-gradient:hover::after {
+            left: 100%;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd6, #6a4190);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content,
+            .dashboard-header {
+                margin-left: 0;
+                left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .page-header,
+            .stats-grid,
+            .table-section {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                padding: 0 1rem;
+            }
+
+            .search-box {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Sidebar - EXACT COPY FROM ADMIN DASHBOARD -->
+    <nav class="sidebar" data-aos="fade-right" data-aos-duration="600">
+        <div class="sidebar-brand">
+            <h4><i class="bi bi-shield-lock-check"></i> Task Manager Pro</h4>
+            <small>Admin Control Panel</small>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="100">
+                <a class="nav-link" href="/admin/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="150">
+                <a class="nav-link" href="/admin/task"><i class="bi bi-list-task"></i> Tasks</a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                <a class="nav-link active" href="/admin/user"><i class="bi bi-people"></i> Users</a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="250">
+                <a class="nav-link" href="/admin/category"><i class="bi bi-tags"></i> Categories</a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <%= (user?.username || 'A' ).charAt(0).toUpperCase() %>
+                </div>
+                <div>
+                    <div style="font-weight: 500; font-size: 0.9rem;">
+                        <%= user?.username || 'Admin' %>
+                    </div>
+                    <small style="color: rgba(255,255,255,0.6);">
+                        <%= user?.email || 'admin@taskmanager.com' %>
+                    </small>
+                </div>
+            </div>
+            <a href="/logout"
+                class="btn btn-gradient w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search users..." id="userSearch">
+            </div>
+            <div class="header-actions">
+                <div class="header-btn" title="Notifications"><i class="bi bi-bell"></i><span class="badge">2</span>
+                </div>
+                <button class="header-btn d-lg-none" id="sidebarToggle"><i class="bi bi-list"></i></button>
+            </div>
+        </header>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-title" data-aos="fade-down">
+                <h2><i class="bi bi-people"></i> Manage Users</h2>
+                <p>View and manage all registered users</p>
+            </div>
+            <a href="/admin/" class="btn-back" data-aos="fade-left">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- Stats Cards - Uses YOUR variables -->
+        <div class="stats-grid">
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-icon primary floating"><i class="bi bi-people"></i></div>
+                <div class="stat-info">
+                    <h6>Total Users</h6>
+                    <div class="stat-value counter" id="totalUsers">
+                        <%= users?.length || 0 %>
+                    </div>
+                    <div class="stat-sub">Registered accounts</div>
+                </div>
+            </div>
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-icon success floating"><i class="bi bi-person-check"></i></div>
+                <div class="stat-info">
+                    <h6>Active Users</h6>
+                    <div class="stat-value counter">
+                        <%= users?.filter(u=> u.active !== false).length || 0 %>
+                    </div>
+                    <div class="stat-sub">Last 30 days</div>
+                </div>
+            </div>
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-icon warning floating"><i class="bi bi-shield"></i></div>
+                <div class="stat-info">
+                    <h6>Admins</h6>
+                    <div class="stat-value counter">
+                        <%= users?.filter(u=> u.role === 'admin').length || 0 %>
+                    </div>
+                    <div class="stat-sub">With elevated access</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Toast - Your existing logic -->
+        <% if (success) { %>
+            <div style="padding: 0 2rem;">
+                <div class="toast toast-animated bg-success align-items-center border-0 shadow-lg mb-3" role="alert">
+                    <div class="d-flex w-100">
+                        <div class="toast-body d-flex align-items-center gap-2 flex-grow-1">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span class="small fw-medium">
+                                <%= success %>
+                            </span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+                <!-- Users Table - YOUR data, premium UI -->
+                <div class="table-section">
+                    <div class="glass-card table-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="table-header">
+                            <div class="table-title"><i class="bi bi-list-ul"></i> User Directory</div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm"
+                                    style="background:rgba(255,255,255,0.1);border:1px solid var(--glass-border-dark);color:white;border-radius:8px;"
+                                    onclick="exportUsers()">
+                                    <i class="bi bi-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="premium-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                        <th>Last Active</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody text-primary">
+                                    <% if (users && users.length> 0) { %>
+                                        <% users.forEach((u, index)=> { %>
+                                            <tr data-aos="fade-in" data-aos-delay="<%= index * 50 %>">
+                                                <td>
+                                                    <div class="user-cell">
+                                                        <div class="avatar">
+                                                            <%= u.username.charAt(0).toUpperCase() %>
+                                                        </div>
+                                                        <div class="user-info">
+                                                            <span class="name">
+                                                                <%= u.username %>
+                                                            </span>
+                                                            <span class="email">
+                                                                <%= u.email || 'no-email@provided' %>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span
+                                                        class="role-badge <%= u.role === 'admin' ? 'admin' : 'user' %>">
+                                                        <%= u.role %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="" style="color: #f8f9fa;">
+                                                        <%= new Date(u.createdAt).toLocaleDateString('en-US', {
+                                                            month:'short', day:'numeric', year:'numeric' }) %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <small class="" style="color: #f8f9fa;">
+                                                        <%= new Date(u.lastLogin ||
+                                                            u.createdAt).toLocaleTimeString('en-US', { hour:'2-digit',
+                                                            minute:'2-digit' }) %>
+                                                    </small>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="action-btns text-center">
+                                                        <!-- <a href="/admin/user/<%= u._id %>/edit" class="action-btn"
+                                                            title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a> -->
+                                                        <form action="/admin/user/<%= u._id %>/delete" method="get"
+                                                            class="d-inline-block text-center"
+                                                            onsubmit="return confirm('Delete user <%= u.username %>?')">
+                                                            <button type="submit" class="action-btn text-danger"
+                                                                title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            <div class="empty-state">
+                                                                <i class="bi bi-people"></i>
+                                                                <p class="fw-semibold">No users found</p>
+                                                                <small>Registered users will appear here</small>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // Initialize AOS
+        AOS.init({ once: true, offset: 50, duration: 600, easing: 'ease-out-cubic' });
+
+        // Particle Background (lightweight)
+        function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize); resize();
+
+            const particles = [], count = Math.min(40, Math.floor(window.innerWidth / 25));
+            class P {
+                constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.s = Math.random() * 2 + 0.5; this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4; this.o = Math.random() * 0.4 + 0.15; }
+                update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; if (this.y < 0 || this.y > canvas.height) this.vy *= -1; }
+                draw() { ctx.fillStyle = `rgba(102,126,234,${this.o})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2); ctx.fill(); }
+            }
+            for (let i = 0; i < count; i++) particles.push(new P());
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                particles.forEach((p1, i) => particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x, dy = p1.y - p2.y, d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < 100) { ctx.strokeStyle = `rgba(102,126,234,${0.12 * (1 - d / 100)})`; ctx.lineWidth = 0.4; ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
+                }));
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+        initParticles();
+
+        // Animated Counter
+        function animateCounter(el, target, duration = 1000) {
+            if (!el) return; let start = 0, inc = target / (duration / 16);
+            const t = setInterval(() => { start += inc; if (start >= target) { el.textContent = target; clearInterval(t); } else { el.textContent = Math.floor(start); el.classList.add('counting'); setTimeout(() => el.classList.remove('counting'), 100); } }, 16);
+        }
+
+        // Run counters on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const totalEl = document.getElementById('totalUsers');
+            if (totalEl) animateCounter(totalEl, parseInt(totalEl.textContent) || 0, 1500);
+
+            // Sidebar toggle
+            document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+
+            // Search filter
+            document.getElementById('userSearch')?.addEventListener('input', function (e) {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('#usersTableBody tr').forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+                });
+            });
+
+            // Welcome toast
+            setTimeout(() => showToast('Welcome, <%= user?.username || "Admin" %>! 👋', 'success'), 800);
+        });
+
+        // Toast function
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const icons = { success: 'check-circle-fill', error: 'x-circle-fill', warning: 'exclamation-triangle-fill', info: 'info-circle-fill' };
+            const bg = { success: 'bg-success', error: 'bg-danger', warning: 'bg-warning text-dark', info: 'bg-white' };
+            toast.className = `toast toast-animated align-items-center border-0 shadow-lg mb-2 ${bg[type] || 'bg-white'}`;
+            toast.innerHTML = `<div class="d-flex w-100"><div class="toast-body d-flex align-items-center gap-2 flex-grow-1"><i class="bi bi-${icons[type] || icons.info}"></i><span class="small fw-medium">${msg}</span></div><button type="button" class="btn-close ${type === 'warning' ? '' : 'btn-close-white'} me-2" data-bs-dismiss="toast"></button></div>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(20px)'; setTimeout(() => toast.remove(), 300); }, 3000);
+            toast.querySelector('.btn-close').onclick = () => toast.remove();
+        }
+
+        // Export function (placeholder)
+        function exportUsers() { showToast('Exporting users...', 'info'); setTimeout(() => showToast('CSV downloaded! 📊', 'success'), 1200); }
+    </script>
+</body>
+
+</html>

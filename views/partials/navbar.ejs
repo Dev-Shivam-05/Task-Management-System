@@ -1,0 +1,110 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-lg" data-aos="fade-down" data-aos-duration="800">
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+      <span class="floating">📋</span>
+      <span class="text-gradient">Task Manager</span>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item">
+          <a class="nav-link active d-flex align-items-center gap-1" href="/task">
+            <i class="bi bi-list-task"></i> My Tasks
+          </a>
+        </li>
+
+        <% if (user && user.role==='admin' ) { %>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1 text-warning" href="/admin">
+              <i class="bi bi-shield-lock"></i> Admin Panel
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-1" href="/category">
+              <i class="bi bi-tags"></i> Categories
+            </a>
+          </li>
+          <% } %>
+
+            <li class="nav-item">
+              <span class="navbar-text d-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-white/10">
+                <i class="bi bi-person-circle text-info"></i>
+                <span class="fw-medium">
+                  <%= user ? user.role : 'Guest' %>
+                </span>
+              </span>
+            </li>
+
+            <li class="nav-item">
+              <form action="/logout" method="POST">
+                <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 px-3" type="submit">
+                  <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+              </form>
+            </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Toast Container for Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Particle Background Script (lightweight) -->
+<canvas id="particle-canvas"></canvas>
+<script>
+  // Minimal particle system - exam safe
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('particle-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = 95;
+
+    const particles = [];
+    const particleCount = 25;
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.speedY = Math.random() * 0.5 - 0.25;
+        this.opacity = Math.random() * 0.5 + 0.2;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+      }
+      draw() {
+        ctx.fillStyle = `rgba(102, 126, 234, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  });
+</script>

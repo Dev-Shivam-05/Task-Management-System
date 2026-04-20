@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Task Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(20, 20, 35, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            /* Deep Slate */
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            min-height: 100vh;
+            color: var(--text-main);
+            overflow-x: hidden;
+            padding-top: 1.5px;
+            /* Space for fixed navbar */
+        }
+
+        /* Navbar Override for Seamless Look */
+        .navbar {
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        /* Main Layout Container - Fluid & Wide */
+        .main-stage {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* The Glass Panel (Form + List Combined) */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            /* Keeps children inside rounded corners */
+        }
+
+        /* Header Area */
+        .panel-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .panel-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+            margin: 0;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            background: rgba(102, 126, 234, 0.15);
+            color: #a5b4fc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        /* Form Area Wrapper */
+        .form-wrapper {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* List Area Wrapper */
+        .list-wrapper {
+            padding: 0;
+            max-height: 600px;
+            /* Scrollable if too many tasks */
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar for List */
+        .list-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .list-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .list-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .list-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <%- include('../partials/navbar.ejs') %>
+
+        <div class="main-stage">
+
+            <!-- The Unified Glass Panel -->
+            <div class="glass-panel" data-aos="fade-up" data-aos-duration="600">
+
+                <!-- 1. Header -->
+                <div class="panel-header">
+                    <h2 class="panel-title">Mission Control</h2>
+                    <span class="stat-pill">
+                        <%= tasks ? tasks.length : 0 %> TASKS
+                    </span>
+                </div>
+
+                <!-- 2. Input Form (Tight Integration) -->
+                <div class="form-wrapper">
+                    <%- include('./taskForm.ejs') %>
+                </div>
+
+                <!-- 3. Task List (Directly Below) -->
+                <div class="list-wrapper">
+                    <% if (typeof success !=='undefined' && success) { %>
+                        <div class="mx-4 mt-3 alert alert-success alert-dismissible fade show border-0 d-flex align-items-center"
+                            style="background: rgba(16, 185, 129, 0.1); color: #34d399; font-size: 0.9rem;"
+                            role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <%= success %>
+                                <button type="button" class="btn-close btn-close-white"
+                                    data-bs-dismiss="alert"></button>
+                        </div>
+                        <% } %>
+
+                            <% if (tasks && tasks.length> 0) { %>
+                                <div class="p-2">
+                                    <% tasks.forEach((task, index)=> { %>
+                                        <%- include('./taskItem.ejs', { task: task, user: user, index: index }) %>
+                                            <% }); %>
+                                </div>
+                                <% } else { %>
+                                    <div class="empty-state">
+                                        <i class="bi bi-inbox display-4 mb-3 opacity-25"></i>
+                                        <p class="mb-0 small">All systems clear. No tasks pending.</p>
+                                    </div>
+                                    <% } %>
+                </div>
+
+            </div>
+
+            <!-- Footer Decor -->
+            <div class="text-center mt-4 mb-5">
+                <small class="text-muted opacity-50"
+                    style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;">
+                    SECURE CONNECTION • ENCRYPTED • v2.0
+                </small>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+        <script>
+            AOS.init({ once: true, offset: 50, duration: 600 });
+        </script>
+</body>
+
+</html>

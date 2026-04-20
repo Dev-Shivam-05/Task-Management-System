@@ -1,0 +1,140 @@
+<!-- taskItem.ejs -->
+<div class="task-row-glass" data-aos="fade-up" data-aos-delay="<%= index * 30 %>">
+    <div class="d-flex justify-content-between align-items-center p-3">
+
+        <!-- Left: Status & Text -->
+        <div class="d-flex align-items-center gap-3 flex-grow-1 overflow-hidden">
+
+            <!-- Minimal Status Dot -->
+            <div class="status-indicator">
+                <div class="dot <%= task.status === 'completed' ? 'dot-success' : 'dot-pending' %>"></div>
+            </div>
+       
+            <!-- Content -->
+            <div class="flex-grow-1 text-truncate">
+                <div class="task-title text-truncate <%= task.status === 'completed' ? 'completed-task' : '' %>">
+                    <%= task.title %>
+                </div>
+                <div class="task-meta d-flex gap-3 mt-1">
+                    <span class="meta-item"><i class="bi bi-tag"></i>
+                        <%= task.category?.name || 'General' %>
+                    </span>
+                    <span class="meta-item"><i class="bi bi-person"></i>
+                        <%= task.creator?.username || 'Me' %>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Actions (Clean Icon) -->
+        <div class="actions ms-2">
+            <% if (user && (user.role==='admin' || (task.creator && task.creator._id?.toString()===user.id))) { %>
+                <form action="/tasks/<%= task._id %>/delete" method="POST"
+                    onsubmit="return confirm('Delete this task?');">
+                    <button type="submit" class="btn-delete" title="Delete">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </form>
+                <% } %>
+        </div>
+                <!-- But this is not matching to the theme so I need you to match it according to the theme -->
+        <% if (task.status === 'pending') { %>
+            <div class="actions ms-2">
+                <form action="/tasks/<%= task._id %>/complete" method="POST">
+                    <button type="submit" class="btn-complete btn btn-success" title="Complete">
+                        <i class="bi bi-check2"></i>
+                    </button>
+                </form>
+            </div>
+        <% } %>
+
+
+    </div>
+</div>
+
+<style>
+    /* The Row Container */
+    .task-row-glass {
+        background: transparent;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        transition: all 0.2s ease;
+        border-radius: 8px;
+    }
+
+    .task-row-glass:last-child {
+        border-bottom: none;
+    }
+
+    .task-row-glass:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Status Dots */
+    .status-indicator {
+        display: flex;
+        align-items: center;
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        box-shadow: 0 0 8px currentColor;
+    }
+
+    .dot-success {
+        background-color: #10b981;
+        color: #10b981;
+    }
+
+    .dot-pending {
+        background-color: #f59e0b;
+        color: #f59e0b;
+    }
+
+    /* Typography */
+    .task-title {
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #fff;
+        transition: all 0.3s;
+    }
+
+    .completed-task {
+        text-decoration: line-through;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .task-meta {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .meta-item i {
+        margin-right: 4px;
+        opacity: 0.7;
+    }
+
+    /* Delete Button */
+    .btn-delete {
+        background: transparent;
+        border: none;
+        color: #475569;
+        padding: 6px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .task-row-glass:hover .btn-delete {
+        color: #94a3b8;
+    }
+
+    .btn-delete:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444 !important;
+    }
+</style>

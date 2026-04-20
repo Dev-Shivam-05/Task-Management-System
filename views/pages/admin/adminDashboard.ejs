@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Task Manager Pro</title>
+
+    <!-- Core Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Chart.js for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- PREMIUM DESIGN SYSTEM - Extracted & Enhanced from Login -->
+    <style>
+        :root {
+            /* Core Gradients - Match Login Exactly */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+
+            /* Glassmorphism System */
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-bg-dark: rgba(30, 35, 50, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-border-dark: rgba(255, 255, 255, 0.15);
+
+            /* Shadow System */
+            --shadow-soft: 0 8px 32px rgba(31, 38, 135, 0.1);
+            --shadow-hover: 0 20px 40px rgba(31, 38, 135, 0.2);
+            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+            /* Dashboard Specific */
+            --sidebar-width: 280px;
+            --header-height: 72px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #f8f9fa;
+            position: relative;
+        }
+
+        /* Animated Background Particles - Lightweight Canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        /* Rotating Radial Glow - Login Page Signature */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, transparent 70%);
+            animation: rotate 25s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== GLASSMORPHISM CARDS ===== */
+        .glass-card {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border-dark);
+            border-radius: 20px;
+            box-shadow: var(--shadow-glass);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+            transition: left 0.6s ease;
+            pointer-events: none;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        /* ===== SIDEBAR - Premium Glass Design ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-right: 1px solid var(--glass-border-dark);
+            z-index: 1000;
+            padding: 1.5rem 1rem;
+            transition: transform var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 0.5rem 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--glass-border-dark);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-brand h4 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand small {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+        }
+
+        .nav-item {
+            margin: 0.25rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--primary-gradient);
+            color: white !important;
+            transform: translateX(4px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.3);
+            }
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border-dark);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .user-avatar {
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 10px 14px;
+        }
+
+        /* ===== MAIN CONTENT LAYOUT ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding-top: var(--header-height);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ===== HEADER ===== */
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 999;
+            transition: left var(--transition-speed) ease;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .header-btn:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .header-btn .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger-gradient);
+            border: 2px solid #1a1a2e;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            min-width: auto;
+        }
+
+        /* ===== STATS CARDS - Animated Counters ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem 2rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon::after {
+            opacity: 1;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(45deg) translateX(-100%);
+            }
+
+            100% {
+                transform: rotate(45deg) translateX(100%);
+            }
+        }
+
+        .stat-icon.primary {
+            background: var(--primary-gradient);
+        }
+
+        .stat-icon.success {
+            background: var(--success-gradient);
+        }
+
+        .stat-icon.warning {
+            background: var(--warning-gradient);
+        }
+
+        .stat-icon.danger {
+            background: var(--danger-gradient);
+        }
+
+        .stat-info h6 {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: #38ef7d;
+        }
+
+        .stat-change.negative {
+            color: #f45c43;
+        }
+
+        /* ===== CHARTS SECTION ===== */
+        .charts-section {
+            padding: 0 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border-dark);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .chart-btn:hover,
+        .chart-btn.active {
+            background: var(--primary-gradient);
+            border-color: transparent;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        /* ===== DATA TABLE - Premium Styling ===== */
+        .table-section {
+            padding: 0 2rem 2rem;
+        }
+
+        .table-card {
+            padding: 1.5rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .table-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .table-btn:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .table-btn.primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .premium-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0;
+        }
+
+        .premium-table th {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid var(--glass-border-dark);
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .premium-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            vertical-align: middle;
+            transition: background 0.2s ease;
+        }
+
+        .premium-table tbody tr {
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .premium-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.12), transparent) !important;
+            transform: translateX(4px);
+        }
+
+        .premium-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.completed {
+            background: rgba(56, 239, 125, 0.15);
+            color: #38ef7d;
+            border: 1px solid rgba(56, 239, 125, 0.3);
+        }
+
+        .status-badge.in-progress {
+            background: rgba(102, 126, 234, 0.15);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .status-badge.overdue {
+            background: rgba(235, 51, 73, 0.15);
+            color: #eb3349;
+            border: 1px solid rgba(235, 51, 73, 0.3);
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-cell .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .user-cell .user-info span {
+            display: block;
+        }
+
+        .user-cell .user-info .name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .user-cell .user-info .email {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .progress-cell {
+            width: 120px;
+        }
+
+        .progress-bar-glass {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-glass .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--primary-gradient);
+            position: relative;
+            transition: width 0.6s ease;
+        }
+
+        .progress-bar-glass .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progress-shine 2s infinite;
+        }
+
+        @keyframes progress-shine {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.danger:hover {
+            background: var(--danger-gradient);
+        }
+
+        /* ===== QUICK ACTIONS & ACTIVITY ===== */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 0 2rem 2rem;
+        }
+
+        .action-card {
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .action-card i {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .action-card.primary i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .action-card.success i {
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .action-card.warning i {
+            background: var(--warning-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .action-card span {
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .activity-timeline {
+            padding: 1.5rem;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 2.25rem;
+            bottom: -1rem;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .timeline-icon.primary {
+            background: var(--primary-gradient);
+        }
+
+        .timeline-icon.success {
+            background: var(--success-gradient);
+        }
+
+        .timeline-icon.warning {
+            background: var(--warning-gradient);
+        }
+
+        .timeline-content h6 {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ===== SKELETON LOADING ===== */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.08) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-text {
+            height: 16px;
+            margin: 0.5rem 0;
+        }
+
+        .skeleton-text.short {
+            width: 40%;
+        }
+
+        .skeleton-text.medium {
+            width: 70%;
+        }
+
+        .skeleton-text.long {
+            width: 100%;
+        }
+
+        .skeleton-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .skeleton-chart {
+            height: 280px;
+            border-radius: 16px;
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 380px;
+        }
+
+        .toast-animated {
+            animation: slideInRight 0.4s ease, fadeOut 0.4s ease 2.6s forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        .toast {
+            border-radius: 14px !important;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border-dark) !important;
+        }
+
+        .toast.bg-success {
+            background: rgba(17, 153, 142, 0.9) !important;
+        }
+
+        .toast.bg-danger {
+            background: rgba(235, 51, 73, 0.9) !important;
+        }
+
+        .toast.bg-white {
+            background: var(--glass-bg-dark) !important;
+            color: white;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content,
+            .dashboard-header {
+                margin-left: 0;
+                left: 0;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                padding: 0 1rem;
+            }
+
+            .search-box {
+                max-width: 200px;
+            }
+
+            .table-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-gradient {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 0.6rem 1.4rem;
+        }
+
+        .btn-gradient::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-gradient:hover::after {
+            left: 100%;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .pulse-critical {
+            animation: pulse-critical 2s infinite;
+        }
+
+        @keyframes pulse-critical {
+            0% {
+                box-shadow: 0 0 0 0 rgba(235, 51, 73, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(235, 51, 73, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(235, 51, 73, 0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd6, #6a4190);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input:checked+.toggle-slider {
+            background: var(--primary-gradient);
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" data-aos="fade-right" data-aos-duration="600">
+        <div class="sidebar-brand">
+            <h4><i class="bi bi-shield-lock-check"></i> Task Manager Pro</h4>
+            <small>Admin Control Panel</small>
+        </div>
+
+        <ul class="nav flex-column">
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="100">
+                <a class="nav-link active" href="/admin/">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="150">
+                <a class="nav-link" href="/admin/task">
+                    <i class="bi bi-list-task"></i> Tasks
+                </a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                <a class="nav-link" href="/admin/user">
+                    <i class="bi bi-people"></i> Users
+                </a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="250">
+                <a class="nav-link" href="/admin/category">
+                    <i class="bi bi-tags"></i> Categories
+                </a>
+            </li>
+            <!-- <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
+                <a class="nav-link" href="/admin/analytics">
+                    <i class="bi bi-graph-up"></i> Analytics
+                </a>
+            </li>
+            <li class="nav-item" data-aos="fade-right" data-aos-delay="350">
+                <a class="nav-link" href="/admin/settings">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li> -->
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">A</div>
+                <div>
+                    <div style="font-weight: 500; font-size: 0.9rem;">Admin User</div>
+                    <small style="color: rgba(255,255,255,0.6);">admin@taskmanager.com</small>
+                </div>
+            </div>
+            <a href="/logout"
+                class="btn btn-gradient w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search tasks, users, categories..." id="globalSearch">
+            </div>
+
+            <div class="header-actions">
+                <div class="header-btn" title="Toggle Theme">
+                    <i class="bi bi-moon-stars"></i>
+                </div>
+                <div class="header-btn" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="header-btn" title="Quick Add">
+                    <i class="bi bi-plus-lg"></i>
+                </div>
+                <button class="header-btn d-lg-none" id="sidebarToggle" title="Toggle Menu">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-icon primary floating">
+                    <i class="bi bi-list-task"></i>
+                </div>
+                <div class="stat-info">
+                    <h6>Total Tasks</h6>
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up-short"></i>
+                        <span id="tasksChange">+12.5%</span> this week
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-icon success floating">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-info">
+                    <h6>Active Users</h6>
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up-short"></i>
+                        <span id="usersChange">+8.2%</span> this month
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-icon warning floating">
+                    <i class="bi bi-tags"></i>
+                </div>
+                <div class="stat-info">
+                    <h6>Categories</h6>
+                    <div class="stat-value" id="totalCategories">0</div>
+                    <div class="stat-change negative">
+                        <i class="bi bi-arrow-down-short"></i>
+                        <span id="categoriesChange">-2.1%</span> inactive
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card stat-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-icon danger floating">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-info">
+                    <h6>Pending Tasks</h6>
+                    <div class="stat-value" id="pendingTasks">0</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up-short"></i>
+                        <span id="pendingChange">+5.3%</span> need attention
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <!-- Task Distribution Chart -->
+            <div class="glass-card chart-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="bi bi-pie-chart"></i>
+                        <span>Task Distribution</span>
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-btn active">Week</button>
+                        <button class="chart-btn">Month</button>
+                        <button class="chart-btn">Year</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Activity Timeline Chart -->
+            <div class="glass-card chart-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Activity Over Time</span>
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-btn active">Tasks</button>
+                        <button class="chart-btn">Users</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="glass-card chart-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>Category Breakdown</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="glass-card chart-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="bi bi-speedometer"></i>
+                        <span>Performance Metrics</span>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Tasks Table -->
+        <div class="table-section">
+            <div class="glass-card table-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="bi bi-list-ul"></i>
+                        <span>Recent Tasks</span>
+                    </div>
+                    <div class="table-controls">
+                        <button class="table-btn" onclick="exportData()">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                        <button class="table-btn primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                            <i class="bi bi-plus-lg"></i> Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Assigned To</th>
+                                <th>Category</th>
+                                <th>Progress</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTableBody">
+                            <!-- Dynamic content will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Activity -->
+        <div class="action-grid">
+            <div class="glass-card action-card primary" data-aos="zoom-in" data-aos-delay="100"
+                onclick="showToast('Creating new task...', 'info')">
+                <i class="bi bi-plus-circle"></i>
+                <span>Create Task</span>
+            </div>
+            <div class="glass-card action-card success" data-aos="zoom-in" data-aos-delay="150"
+                onclick="showToast('Inviting team member...', 'success')">
+                <i class="bi bi-person-plus"></i>
+                <span>Add User</span>
+            </div>
+            <div class="glass-card action-card warning" data-aos="zoom-in" data-aos-delay="200"
+                onclick="showToast('Generating report...', 'info')">
+                <i class="bi bi-file-earmark-bar-graph"></i>
+                <span>Generate Report</span>
+            </div>
+            <div class="glass-card action-card" data-aos="zoom-in" data-aos-delay="250"
+                onclick="showToast('Syncing data...', 'info')">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Sync Data</span>
+            </div>
+        </div>
+
+        <!-- Recent Activity Timeline -->
+        <div class="table-section">
+            <div class="glass-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="activity-timeline">
+                    <div class="chart-header"
+                        style="border-bottom: 1px solid var(--glass-border-dark); margin-bottom: 1.5rem; padding-bottom: 1rem;">
+                        <div class="chart-title">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Recent Activity</span>
+                        </div>
+                        <small class="text-muted">Last updated: <span id="lastUpdated"></span></small>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon primary">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Task Completed</h6>
+                            <p>"API Integration Module" marked as done by <strong>Sarah Chen</strong></p>
+                            <span class="timeline-time">2 minutes ago</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon success">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>New User Registered</h6>
+                            <p><strong>Miguel Rodriguez</strong> joined the team as Developer</p>
+                            <span class="timeline-time">15 minutes ago</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Deadline Approaching</h6>
+                            <p>"Database Migration" due in <strong>4 hours</strong></p>
+                            <span class="timeline-time">1 hour ago</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-icon primary">
+                            <i class="bi bi-tag"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h6>Category Created</h6>
+                            <p>New category "Q4 Initiatives" added by admin</p>
+                            <span class="timeline-time">3 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize AOS animations
+            AOS.init({
+                once: true,
+                offset: 50,
+                duration: 600,
+                easing: 'ease-out-cubic'
+            });
+
+            // Update last updated time
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+
+            // Initialize particle background
+            initParticles();
+
+            // Load dashboard data
+            loadDashboardData();
+
+            // Initialize charts
+            initCharts();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Welcome back, Admin! 🚀', 'success');
+            }, 1000);
+        });
+
+        // ===== PARTICLE BACKGROUND (Lightweight Canvas) =====
+        function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const particles = [];
+            const particleCount = Math.min(50, Math.floor(window.innerWidth / 20));
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.5;
+                    this.speedY = (Math.random() - 0.5) * 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                }
+
+                draw() {
+                    ctx.fillStyle = `rgba(102, 126, 234, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+
+                // Draw connections
+                particles.forEach((p1, i) => {
+                    particles.slice(i + 1).forEach(p2 => {
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < 120) {
+                            ctx.strokeStyle = `rgba(102, 126, 234, ${0.15 * (1 - distance / 120)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.stroke();
+                        }
+                    });
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ===== DASHBOARD DATA LOADING (Simulated Real Data) =====
+        function loadDashboardData() {
+            // Simulate API call with realistic data
+            const stats = {
+                totalTasks: Number("<%= stats.totalTasks %>"),
+                totalUsers: Number("<%= stats.totalUsers %>"),
+                totalCategories: Number("<%= stats.totalCategories %>"),
+                pendingTasks: Number("<%= stats.pendingTasks %>"),
+                tasksChange: Number("<%= stats.tasksChange %>"),
+                usersChange: Number("<%= stats.usersChange %>"),
+                categoriesChange: Number("<%= stats.categoriesChange %>"),
+                pendingChange: Number("<%= stats.pendingChange %>")
+            };
+            console.log(stats);
+
+            // Animate counters
+            animateCounter('totalTasks', stats.totalTasks, 2000);
+            animateCounter('totalUsers', stats.totalUsers, 2000);
+            animateCounter('totalCategories', stats.totalCategories, 2000);
+            animateCounter('pendingTasks', stats.pendingTasks, 2000);
+
+            // Update change indicators
+            document.getElementById('tasksChange').textContent = `${stats.tasksChange > 0 ? '+' : ''}${stats.tasksChange}%`;
+            document.getElementById('usersChange').textContent = `${stats.usersChange > 0 ? '+' : ''}${stats.usersChange}%`;
+            document.getElementById('categoriesChange').textContent = `${stats.categoriesChange > 0 ? '+' : ''}${stats.categoriesChange}%`;
+            document.getElementById('pendingChange').textContent = `${stats.pendingChange > 0 ? '+' : ''}${stats.pendingChange}%`;
+
+            // Load table data
+            loadTasksTable();
+        }
+
+        // ===== ANIMATED COUNTER =====
+        function animateCounter(elementId, target, duration) {
+            const element = document.getElementById(elementId);
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // ===== CHARTS INITIALIZATION (Chart.js with Premium Styling) =====
+        function initCharts() {
+            // Common gradient helper
+            function createGradient(ctx, area, colors) {
+                const gradient = ctx.createLinearGradient(...area);
+                colors.forEach((color, index) => {
+                    gradient.addColorStop(index / (colors.length - 1), color);
+                });
+                return gradient;
+            }
+
+            // 1. Task Distribution (Doughnut Chart)
+            const distCtx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Pending', 'Overdue'],
+                    datasets: [{
+                        data: [142, 58, 34, 13],
+                        backgroundColor: [
+                            'rgba(56, 239, 125, 0.9)',
+                            'rgba(102, 126, 234, 0.9)',
+                            'rgba(245, 158, 11, 0.9)',
+                            'rgba(235, 51, 73, 0.9)'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255,255,255,0.85)',
+                                padding: 20,
+                                font: { family: 'Inter', size: 11 }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 2. Activity Over Time (Line Chart)
+            const actCtx = document.getElementById('activityChart').getContext('2d');
+            const activityGradient = createGradient(actCtx, [0, 0, 0, 280], [
+                'rgba(102, 126, 234, 0.3)',
+                'rgba(102, 126, 234, 0.05)'
+            ]);
+
+            new Chart(actCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Tasks Completed',
+                        data: [12, 19, 15, 22, 28, 18, 24],
+                        borderColor: '#667eea',
+                        backgroundColor: activityGradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#667eea',
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.7)', font: { family: 'Inter', size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.7)', font: { family: 'Inter', size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // 3. Category Breakdown (Bar Chart)
+            const catCtx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(catCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Development', 'Design', 'Marketing', 'QA', 'DevOps', 'Research'],
+                    datasets: [{
+                        label: 'Tasks',
+                        data: [89, 45, 32, 28, 21, 15],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(118, 75, 162, 0.8)',
+                            'rgba(240, 147, 251, 0.8)',
+                            'rgba(79, 172, 254, 0.8)',
+                            'rgba(17, 153, 142, 0.8)',
+                            'rgba(245, 87, 108, 0.8)'
+                        ],
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.7)', font: { family: 'Inter', size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: 'rgba(255,255,255,0.7)',
+                                font: { family: 'Inter', size: 9 },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 4. Performance Metrics (Radar Chart)
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(perfCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Speed', 'Quality', 'Collaboration', 'Innovation', 'Reliability'],
+                    datasets: [{
+                        label: 'Team Performance',
+                        data: [85, 92, 78, 88, 95],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255,255,255,0.15)' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: {
+                                color: 'rgba(255,255,255,0.85)',
+                                font: { family: 'Inter', size: 10 }
+                            },
+                            ticks: {
+                                display: false,
+                                backdropColor: 'transparent'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== TASKS TABLE POPULATION =====
+        function loadTasksTable() {
+            const tasks = [
+                { id: 1, title: 'API Integration Module', assignee: 'Sarah Chen', email: 'sarah@company.com', category: 'Development', progress: 95, due: 'Today', status: 'completed' },
+                { id: 2, title: 'User Dashboard Redesign', assignee: 'Miguel Rodriguez', email: 'miguel@company.com', category: 'Design', progress: 78, due: 'Tomorrow', status: 'in-progress' },
+                { id: 3, title: 'Database Optimization', assignee: 'Alex Thompson', email: 'alex@company.com', category: 'DevOps', progress: 45, due: 'Dec 28', status: 'in-progress' },
+                { id: 4, title: 'Marketing Campaign Q4', assignee: 'Emma Wilson', email: 'emma@company.com', category: 'Marketing', progress: 20, due: 'Dec 30', status: 'pending' },
+                { id: 5, title: 'Security Audit Report', assignee: 'David Kim', email: 'david@company.com', category: 'QA', progress: 10, due: 'Jan 5', status: 'pending' },
+                { id: 6, title: 'Mobile App Bug Fixes', assignee: 'Lisa Park', email: 'lisa@company.com', category: 'Development', progress: 0, due: 'Dec 25', status: 'overdue' }
+            ];
+
+            const tbody = document.getElementById('tasksTableBody');
+            tbody.innerHTML = '';
+
+            tasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div style="font-weight: 500; font-size: 0.95rem;">${task.title}</div>
+                        <small style="color: rgba(255,255,255,0.6);">#TASK-${task.id.toString().padStart(4, '0')}</small>
+                    </td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">${task.assignee.charAt(0)}</div>
+                            <div class="user-info">
+                                <span class="name">${task.assignee}</span>
+                                <span class="email">${task.email}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="color: rgba(255,255,255,0.85);">${task.category}</span></td>
+                    <td class="progress-cell">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="progress-bar-glass">
+                                <div class="progress-fill" style="width: ${task.progress}%"></div>
+                            </div>
+                            <small style="color: rgba(255,255,255,0.85); font-weight: 500;">${task.progress}%</small>
+                        </div>
+                    </td>
+                    <td><span style="color: ${task.status === 'overdue' ? '#f45c43' : 'rgba(255,255,255,0.85)'}">${task.due}</span></td>
+                    <td><span class="status-badge ${task.status}"><i class="bi bi-${task.status === 'completed' ? 'check-circle' : task.status === 'in-progress' ? 'clock' : task.status === 'pending' ? 'hourglass-split' : 'exclamation-circle'}"></i> ${task.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
+                            <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ===== EVENT LISTENERS =====
+        function setupEventListeners() {
+            // Sidebar toggle for mobile
+            document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+                document.querySelector('.sidebar').classList.toggle('show');
+            });
+
+            // Chart period buttons
+            document.querySelectorAll('.chart-actions .chart-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    this.parentElement.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    showToast(`Showing data for: ${this.textContent}`, 'info');
+                });
+            });
+
+            // Global search
+            document.getElementById('globalSearch')?.addEventListener('input', function (e) {
+                const query = e.target.value.toLowerCase();
+                // In real app: filter table data here
+                if (query.length > 2) {
+                    showToast(`Searching for: "${query}"`, 'info');
+                }
+            });
+
+            // Table row click
+            document.getElementById('tasksTableBody')?.addEventListener('click', function (e) {
+                const row = e.target.closest('tr');
+                if (row && !e.target.closest('.action-btn')) {
+                    const taskId = row.querySelector('small').textContent;
+                    showToast(`Viewing details for ${taskId}`, 'info');
+                }
+            });
+        }
+
+        // ===== TOAST NOTIFICATION SYSTEM (Enhanced) =====
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+
+            const icons = {
+                success: 'check-circle-fill',
+                error: 'x-circle-fill',
+                warning: 'exclamation-triangle-fill',
+                info: 'info-circle-fill'
+            };
+
+            const bgClass = {
+                success: 'bg-success',
+                error: 'bg-danger',
+                warning: 'bg-warning text-dark',
+                info: 'bg-white'
+            };
+
+            toast.className = `toast toast-animated align-items-center border-0 shadow-lg mb-2 ${bgClass[type] || 'bg-white'}`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex w-100">
+                    <div class="toast-body d-flex align-items-center gap-2 flex-grow-1">
+                        <i class="bi bi-${icons[type] || icons.info}"></i>
+                        <span class="small fw-medium">${message}</span>
+                    </div>
+                    <button type="button" class="btn-close ${type === 'warning' ? '' : 'btn-close-white'} me-2" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto-dismiss
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+
+            // Manual dismiss
+            toast.querySelector('.btn-close').addEventListener('click', () => {
+                toast.remove();
+            });
+        }
+
+        // ===== EXPORT FUNCTIONALITY =====
+        function exportData() {
+            showToast('Preparing export...', 'info');
+            setTimeout(() => {
+                showToast('Report exported successfully! 📊', 'success');
+            }, 1500);
+        }
+
+        // ===== REAL-TIME UPDATES SIMULATION =====
+        setInterval(() => {
+            // Simulate real-time activity
+            const activities = [
+                { msg: 'New task assigned to team', type: 'info' },
+                { msg: 'User completed onboarding', type: 'success' },
+                { msg: 'System backup completed', type: 'success' },
+                { msg: 'Pending approval required', type: 'warning' }
+            ];
+
+            // Randomly show notification (20% chance)
+            if (Math.random() < 0.2) {
+                const activity = activities[Math.floor(Math.random() * activities.length)];
+                showToast(activity.msg, activity.type);
+            }
+
+            // Update timestamp
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+        }, 30000);
+    </script>
+</body>
+
+</html>

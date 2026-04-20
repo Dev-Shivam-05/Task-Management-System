@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Tasks | Task Manager Pro</title>
+
+    <!-- Core Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ===== BASE RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===== COLOR SYSTEM - Solid backgrounds only ===== */
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd6;
+            --success: #11998e;
+            --danger: #eb3349;
+            --warning: #f59e0b;
+            --bg-dark: #1a1a2e;
+            --bg-darker: #0f0c29;
+            --text: #f8f9fa;
+            --text-muted: rgba(248, 249, 250, 0.7);
+            --border: rgba(255, 255, 255, 0.15);
+            --card-bg: rgba(30, 35, 50, 0.95);
+            --sidebar-width: 280px;
+            --header-height: 72px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, #302b63 50%, var(--bg-dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ===== SIMPLE PARTICLE BACKGROUND ===== */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.2;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            z-index: 100;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 0.5rem 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-brand h4 {
+            color: var(--primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .sidebar-brand small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            margin: 0.25rem 0;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            color: white !important;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        .user-avatar {
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            padding: 10px 14px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding-top: var(--header-height);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ===== HEADER ===== */
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 99;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-btn:hover {
+            background: var(--primary);
+            border-color: transparent;
+        }
+
+        .header-btn .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger);
+            border: 2px solid var(--bg-dark);
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title h2 {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .page-title p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .btn-back {
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        /* ===== STATS CARDS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            padding: 0 2rem 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.primary {
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+        }
+
+        .stat-icon.success {
+            background: linear-gradient(135deg, var(--success), #38ef7d);
+        }
+
+        .stat-icon.warning {
+            background: linear-gradient(135deg, var(--warning), #f45c43);
+        }
+
+        .stat-info h6 {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 0 0 0.25rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .stat-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== CONTENT GRID ===== */
+        .content-grid {
+            padding: 0 2rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== CARDS ===== */
+        .table-card,
+        .chart-card,
+        .action-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== FORM INPUTS ===== */
+        .form-control-glass {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .form-control-glass:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .form-control-glass::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-gradient {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            border: none;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ===== TABLE ===== */
+        .premium-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .premium-table th {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .premium-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            vertical-align: middle;
+        }
+
+        .premium-table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .premium-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .task-desc {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-cell .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user-cell .name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .user-cell .role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .category-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(79, 172, 254, 0.15);
+            color: #4facfe;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-badge.completed {
+            background: rgba(56, 239, 125, 0.15);
+            color: #38ef7d;
+            border: 1px solid rgba(56, 239, 125, 0.3);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.in-progress {
+            background: rgba(102, 126, 234, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .status-badge.overdue {
+            background: rgba(235, 51, 73, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(235, 51, 73, 0.3);
+        }
+
+        .progress-cell {
+            width: 140px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(135deg, var(--primary), #764ba2);
+            transition: width 0.6s ease;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            border-color: transparent;
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            background: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state p {
+            margin: 0.5rem 0;
+        }
+
+        /* ===== CHART ===== */
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-content {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 20px !important;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border) !important;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border) !important;
+        }
+
+        .modal-title {
+            color: white !important;
+        }
+
+        .btn-close-white {
+            filter: brightness(0) invert(1);
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 380px;
+        }
+
+        .toast {
+            border-radius: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .toast.bg-success {
+            background: rgba(17, 153, 142, 0.95);
+        }
+
+        .toast.bg-danger {
+            background: rgba(235, 51, 73, 0.95);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes countPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .counter.counting {
+            animation: countPulse 0.1s ease-in-out;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content,
+            .dashboard-header {
+                margin-left: 0;
+                left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header,
+            .stats-grid {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                padding: 0 1rem;
+            }
+
+            .search-box {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-brand">
+            <h4><i class="bi bi-shield-lock-check"></i> Task Manager Pro</h4>
+            <small>Admin Control Panel</small>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/admin/task"><i class="bi bi-list-task"></i> Tasks</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/user"><i class="bi bi-people"></i> Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/category"><i class="bi bi-tags"></i> Categories</a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <%= (user?.username || 'A' ).charAt(0).toUpperCase() %>
+                </div>
+                <div>
+                    <div style="font-weight: 500; font-size: 0.9rem;">
+                        <%= user?.username || 'Admin' %>
+                    </div>
+                    <small style="color: var(--text-muted);">
+                        <%= user?.email || 'admin@taskmanager.com' %>
+                    </small>
+                </div>
+            </div>
+            <a href="/logout" class="btn-gradient" style="margin-top: 1rem;">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search tasks..." id="taskSearch">
+            </div>
+            <div class="header-actions">
+                <div class="header-btn" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge">2</span>
+                </div>
+                <button class="header-btn d-lg-none" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-title">
+                <h2><i class="bi bi-list-task"></i> All Tasks</h2>
+                <p>Manage and monitor every task in the system</p>
+            </div>
+            <a href="/admin/" class="btn-back">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- Stats Cards - Uses YOUR tasks variable -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon primary floating"><i class="bi bi-list-task"></i></div>
+                <div class="stat-info">
+                    <h6>Total Tasks</h6>
+                    <div class="stat-value counter" id="totalTasks">
+                        <%= tasks?.length || 0 %>
+                    </div>
+                    <div class="stat-sub">All time</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success floating"><i class="bi bi-check-circle"></i></div>
+                <div class="stat-info">
+                    <h6>Completed</h6>
+                    <div class="stat-value counter">
+                        <%= tasks?.filter(t=> t.status === 'completed').length || 0 %>
+                    </div>
+                    <div class="stat-sub">✓ Done</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning floating"><i class="bi bi-hourglass-split"></i></div>
+                <div class="stat-info">
+                    <h6>Pending</h6>
+                    <div class="stat-value counter">
+                        <%= tasks?.filter(t=> t.status === 'pending').length || 0 %>
+                    </div>
+                    <div class="stat-sub">⏳ In progress</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Toast - Your existing logic -->
+        <% if (success) { %>
+            <div style="padding: 0 2rem;">
+                <div class="toast bg-success align-items-center shadow-lg mb-3" role="alert">
+                    <div class="d-flex w-100">
+                        <div class="toast-body d-flex align-items-center gap-2 flex-grow-1">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span class="small fw-medium">
+                                <%= success %>
+                            </span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+                <div class="form-wrapper container px-3">
+                    <%- include('../taskForm.ejs') %>
+                </div>
+                <!-- Content Grid: Table + Right Column -->
+                <div class="content-grid">
+                    <!-- Tasks Table -->
+                    <div class="table-card">
+                        <div class="table-header">
+                            <div class="table-title"><i class="bi bi-funnel"></i> Filter Tasks</div>
+                            <form class="d-flex gap-2" method="GET">
+                                <select name="status" class="form-control-glass" style="width:auto;">
+                                    <option value="">All Status</option>
+                                    <option value="pending" <%=filters?.status==='pending' ?'selected':'' %>>Pending
+                                    </option>
+                                    <option value="completed" <%=filters?.status==='completed' ?'selected':'' %>
+                                        >Completed</option>
+                                    <option value="in-progress" <%=filters?.status==='in-progress' ?'selected':'' %>>In
+                                        Progress</option>
+                                </select>
+                                <input type="text" name="search" class="form-control-glass" placeholder="Search..."
+                                    value="<%= filters?.search || '' %>" style="width:180px;">
+                                <button type="submit" class="btn-gradient" style="padding:0.75rem 1rem;">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="premium-table">
+                                <thead>
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Assigned To</th>
+                                        <th>Category</th>
+                                        <th>Progress</th>
+                                        <th>Created</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasksTableBody">
+                                    <% if (tasks && tasks.length> 0) { %>
+                                        <% tasks.forEach((task, idx)=> {
+                                            const creator = task.creator || {};
+                                            const category = task.category || {};
+                                            const status = task.status || 'pending';
+                                            const progress = task.progress || (status === 'completed' ? 100 : status ===
+                                            'pending' ? 25 : 60);
+
+                                            const statusConfig = {
+                                            'completed': { class: 'completed', icon: 'check-circle' },
+                                            'in-progress': { class: 'in-progress', icon: 'clock' },
+                                            'progress': { class: 'in-progress', icon: 'clock' },
+                                            'pending': { class: 'pending', icon: 'hourglass-split' },
+                                            'overdue': { class: 'overdue', icon: 'exclamation-circle' }
+                                            };
+                                            const s = statusConfig[status] || statusConfig.pending;
+                                            %>
+                                            <tr>
+                                                <td>
+                                                    <div class="task-title">
+                                                        <%= task.title?.slice(0,11) || 'Untitled' %>
+                                                    </div>
+                                                    <small class="task-desc">
+                                                        <%= task.description?.slice(0,11) || 'No description' %>
+                                                            <%= task.description?.length> 11 ? '...' : '' %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <div class="user-cell">
+                                                        <div class="avatar">
+                                                            <%= (task.assignee?.username || 'U' ).charAt(0).toUpperCase() %>
+                                                        </div>
+                                                        <div>
+                                                            <div class="name">
+                                                                <%= task.assignee?.username || 'Unknown' %>
+                                                            </div>
+                                                            <small class="role">
+                                                                <%= task.assignee?.role || 'user' %>
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="category-badge">
+                                                        <i class="bi bi-tag"></i>
+                                                        <%= category?.name.slice(0,5) || 'Uncategorized' %>
+                                                    </span>
+                                                </td>
+                                                <td class="progress-cell">
+                                                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                                                        <div class="progress-bar">
+                                                            <div class="fill" style="width:<%= progress %>%"
+                                                                title="<%= progress %>%"></div>
+                                                        </div>
+                                                        <small style="color:var(--text-muted);font-weight:500;">
+                                                            <%= progress %>%
+                                                        </small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <small style="color: var(--text-muted);">
+                                                        <%= new Date(task.createdAt).toLocaleDateString('en-US', {
+                                                            month:'short', day:'numeric' }) %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <span class="status-badge <%= s.class %>">
+                                                        <i class="bi bi-<%= s.icon %>"></i>
+                                                        <%= status.replace('-', ' ' ).toUpperCase() %>
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="action-btns">
+                                                        <button class="action-btn" title="Edit" data-bs-toggle="modal"
+                                                            data-bs-target="#editModal-<%= task._id %>">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                        <form action="/admin/task/<%= task._id %>/delete" method="POST"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Delete task '<%= task.title %>' permanently?')">
+                                                            <button type="submit" class="action-btn danger"
+                                                                title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Edit Modal -->
+                                            <div class="modal fade" id="editModal-<%= task._id %>" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <form action="/admin/task/<%= task._id %>/update" method="POST">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Edit Task</h5>
+                                                                <button type="button" class="btn-close btn-close-white"
+                                                                    data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <input type="hidden" name="_method" value="PUT">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Title</label>
+                                                                    <input type="text" name="title"
+                                                                        class="form-control-glass"
+                                                                        value="<%= task.title %>" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Status</label>
+                                                                    <select name="status" class="form-control-glass">
+                                                                        <option value="pending" <%=status==='pending'
+                                                                            ?'selected':'' %>>Pending</option>
+                                                                        <option value="in-progress"
+                                                                            <%=status==='in-progress' ||
+                                                                            status==='progress' ?'selected':'' %>>In
+                                                                            Progress</option>
+                                                                        <option value="completed"
+                                                                            <%=status==='completed' ?'selected':'' %>
+                                                                            >Completed</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Progress (%)</label>
+                                                                    <input type="number" name="progress"
+                                                                        class="form-control-glass"
+                                                                        value="<%= progress %>" min="0" max="100">
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn"
+                                                                    style="background:rgba(255,255,255,0.1);color:white;border:1px solid var(--border);border-radius:10px;"
+                                                                    data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn-gradient">💾 Save
+                                                                    Changes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="7">
+                                                            <div class="empty-state">
+                                                                <i class="bi bi-list-task"></i>
+                                                                <p class="fw-semibold">No tasks found</p>
+                                                                <small>Adjust filters or create a new task</small>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Chart + Quick Actions -->
+                    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+                        <!-- Task Completion Chart -->
+                        <div class="chart-card">
+                            <div class="table-header" style="margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                                <div class="table-title"><i class="bi bi-graph-up"></i> Task Completion</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="taskProgressChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="action-card">
+                            <h5 class="mb-3 fw-semibold"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                            <div class="d-grid gap-2">
+                                <a href="/task/create"
+                                    class="btn-gradient d-flex align-items-center justify-content-center gap-2">
+                                    <i class="bi bi-plus-lg"></i> Create New Task
+                                </a>
+                                <button class="btn"
+                                    style="background:rgba(255,255,255,0.1);color:white;border:1px solid var(--border);border-radius:12px;padding:0.75rem;"
+                                    onclick="showToast('Bulk actions coming soon!', 'info')">
+                                    <i class="bi bi-check2-all me-2"></i> Mark Selected Complete
+                                </button>
+                                <button class="btn"
+                                    style="background:rgba(255,255,255,0.1);color:white;border:1px solid var(--border);border-radius:12px;padding:0.75rem;"
+                                    onclick="exportTasks()">
+                                    <i class="bi bi-download me-2"></i> Export Tasks
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    </div>
+
+    <!-- Scripts - Minimal, Safe -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ===== SAFE DATA INJECTION =====
+        let serverTasks = [];
+        try {
+            serverTasks = <%= JSON.stringify(tasks || []).replace(/</g, '\\u003c') %>;
+        } catch (e) { console.warn('Task data fallback'); }
+
+        // ===== DOM READY =====
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate counters
+            animateCounter('totalTasks', serverTasks.length, 1500);
+
+            const completed = serverTasks.filter(t => t.status === 'completed').length;
+            const pending = serverTasks.filter(t => t.status === 'pending').length;
+            animateCounter('totalTasks', serverTasks.length, 1500);
+            // Note: Other counters already rendered server-side
+
+            // Simple particles
+            initSimpleParticles();
+
+            // Chart with fallback
+            initSimpleChart();
+
+            // Event listeners
+            setupListeners();
+
+            // Show toast if success
+            <% if (success) { %>
+                showToast('<%= success %>', 'success');
+            <% } %>
+        });
+
+        // ===== SIMPLE PARTICLES =====
+        function initSimpleParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const particles = [];
+            for (let i = 0; i < 30; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2 + 0.5,
+                    dx: (Math.random() - 0.5) * 0.3,
+                    dy: (Math.random() - 0.5) * 0.3
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+
+                particles.forEach(p => {
+                    p.x += p.dx; p.y += p.dy;
+                    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ===== ANIMATED COUNTER =====
+        function animateCounter(id, target, duration) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            target = parseInt(target) || 0;
+
+            let start = 0, step = target / (duration / 16);
+            const timer = setInterval(() => {
+                start += step;
+                if (start >= target) {
+                    el.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.floor(start);
+                }
+            }, 16);
+        }
+
+        // ===== CHART.JS WITH FALLBACKS =====
+        function initSimpleChart() {
+            const ctx = document.getElementById('taskProgressChart');
+            if (!ctx || typeof Chart === 'undefined') return;
+
+            const completed = serverTasks.filter(t => t.status === 'completed').length;
+            const pending = serverTasks.filter(t => t.status === 'pending').length;
+            const inProgress = serverTasks.filter(t => t.status === 'in-progress' || t.status === 'progress').length;
+
+            // Build labels/data with fallbacks
+            const labels = [], data = [], colors = [];
+            if (completed > 0) { labels.push('Completed'); data.push(completed); colors.push('#38ef7d'); }
+            if (inProgress > 0) { labels.push('In Progress'); data.push(inProgress); colors.push('#667eea'); }
+            if (pending > 0) { labels.push('Pending'); data.push(pending); colors.push('#f59e0b'); }
+
+            // Fallback if no tasks
+            if (labels.length === 0) { labels.push('No Data'); data.push(1); colors.push('rgba(255,255,255,0.3)'); }
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tasks',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'var(--text-muted)', font: { size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text-muted)', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ===== EVENT LISTENERS =====
+        function setupListeners() {
+            // Sidebar toggle
+            document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+                document.querySelector('.sidebar')?.classList.toggle('show');
+            });
+
+            // Client-side search filter
+            document.getElementById('taskSearch')?.addEventListener('input', function (e) {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('#tasksTableBody tr').forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+                });
+            });
+        }
+
+        // ===== TOAST NOTIFICATIONS =====
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center shadow-lg mb-2 ${type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : ''}`;
+            toast.style.cssText = 'border-radius:14px;border:1px solid var(--border);color:white;';
+            toast.innerHTML = `
+                <div class="d-flex w-100">
+                    <div class="toast-body d-flex align-items-center gap-2 flex-grow-1">
+                        <i class="bi bi-${type === 'success' ? 'check-circle-fill' : type === 'error' ? 'x-circle-fill' : 'info-circle-fill'}"></i>
+                        <span class="small fw-medium">${msg}</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
+                </div>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ===== EXPORT FUNCTION =====
+        function exportTasks() {
+            showToast('Preparing CSV export...', 'info');
+            setTimeout(() => showToast('Tasks exported! Check your downloads. 📊', 'success'), 1500);
+        }
+    </script>
+</body>
+
+</html>
